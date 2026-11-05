@@ -47,7 +47,6 @@ from .latex import (
 )
 from .llm import (
     ProviderError,
-    normalize_language,
     redact,
     validate_translation_language,
 )
@@ -61,7 +60,7 @@ from .sources import (
     find_main,
     visible_tex,
 )
-from .translation import Translator, cache_settings
+from .translation import Translator, cache_settings, cached_translation
 
 JOBS = DATA / "jobs"
 JOBS.mkdir(exist_ok=True)
@@ -699,13 +698,7 @@ class JobManager:
                 try:
                     if not isinstance(cache[key], str):
                         raise ValueError("Invalid cached translation")
-                    cache[key] = normalize_language(
-                        cache[key], settings.target_language
-                    )
-                    validate_translation_language(
-                        item, cache[key], settings.target_language
-                    )
-                    translated[key] = item.restore(cache[key])
+                    translated[key] = cached_translation(cache[key], item, settings)
                 except ValueError:
                     cache.pop(key, None)
         job["cached"] = len(translated)
