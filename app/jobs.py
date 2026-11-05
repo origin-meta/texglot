@@ -455,7 +455,8 @@ class JobManager:
             if prepared_source.exists():
                 shutil.rmtree(prepared_source)
             shutil.copytree(source, prepared_source)
-            prepare_engine_sources(prepared_source, engine)
+            for notice in prepare_engine_sources(prepared_source, engine):
+                await log(notice)
             relocated = rebase_project_paths(prepared_source, main)
             if relocated:
                 await log(
